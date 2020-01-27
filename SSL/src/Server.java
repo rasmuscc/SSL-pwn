@@ -3,7 +3,7 @@ class Server {
         System.out.println("Hello");
     }
 
-    private String padding (String src) {
+    private String addPaddingToMsg (String src) {
         return src;
     }
 
