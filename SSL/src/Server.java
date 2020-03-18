@@ -1,11 +1,8 @@
 import abstractfactories.AbstractFactory;
 import abstractfactories.NormalCBCMode;
-import strategyimplementations.CBCModeStrategy;
-import strategyimplementations.DummyPaddingStrategy;
 import strategyinterfaces.ModeStrategy;
 import strategyinterfaces.PaddingStrategy;
 
-import java.util.Arrays;
 
 class Server {
     private PaddingStrategy paddingStrategy;
