@@ -7,22 +7,27 @@ import strategyinterfaces.PaddingStrategy;
 class Server {
     private PaddingStrategy paddingStrategy;
     private ModeStrategy modeStrategy;
+    private byte[] encryption;
 
     public static void main(String[] args) {
         new Server(new NormalCBCMode());
     }
 
-    private Server(AbstractFactory abstractFactory) {
+    public Server(AbstractFactory abstractFactory) {
         paddingStrategy = abstractFactory.getPaddingStrategy();
         modeStrategy = abstractFactory.getModeStrategy();
 
-        byte[] encryption = modeStrategy.encrypt("HVADSÅDER");
-        byte[] decryption = modeStrategy.decrypt(encryption);
-        System.out.println(new String(decryption));
-        paddingStrategy.checkPadding(decryption);
+        encryption = modeStrategy.encrypt("Insert some message here to test");
     }
 
-    private int listen (int port) {
-        return - 1;
+    public byte[] listen() {
+        return encryption;
     }
+
+    public boolean isPaddingCorrect(byte[] enc) {
+        byte[] decryption = modeStrategy.decrypt(enc);
+
+        return paddingStrategy.checkPadding(decryption);
+    }
+
 }

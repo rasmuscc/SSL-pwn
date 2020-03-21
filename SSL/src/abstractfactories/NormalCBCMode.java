@@ -1,18 +1,18 @@
 package abstractfactories;
 
 import strategyimplementations.CBCModeStrategy;
-import strategyimplementations.DummyPaddingStrategy;
+import strategyimplementations.PKCS7PaddingStrategy;
 import strategyinterfaces.ModeStrategy;
 import strategyinterfaces.PaddingStrategy;
 
 public class NormalCBCMode implements AbstractFactory {
 	@Override
 	public ModeStrategy getModeStrategy() {
-		return new CBCModeStrategy(new DummyPaddingStrategy());
+		return new CBCModeStrategy(new PKCS7PaddingStrategy());
 	}
 
 	@Override
 	public PaddingStrategy getPaddingStrategy() {
-		return new DummyPaddingStrategy();
+		return new PKCS7PaddingStrategy();
 	}
 }
