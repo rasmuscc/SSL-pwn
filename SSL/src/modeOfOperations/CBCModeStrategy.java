@@ -23,17 +23,17 @@ public class CBCModeStrategy implements ModeStrategy {
 
 	public byte[] getIV() {
 		// Should be random, but for testing we make it static
-		byte[] iv = new byte[16];
+		byte[] iv = new byte[blockSize];
 		Random random = new Random();
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < blockSize; i++) {
 			iv[i] = (byte) (random.nextInt(256) + 1);
 			//iv[i] = (byte) alphabet[random.nextInt(alphabet.length - 1)];
 		}
 		return iv;
 	}
 
-	private void setKey(String init) {
-		key = init.getBytes();
+	private void setKey(String initKey) {
+		key = initKey.getBytes();
 	}
 
 	@Override
