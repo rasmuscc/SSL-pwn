@@ -1,9 +1,10 @@
 import abstractfactories.NormalCBCMode;
 
+
 import java.util.Arrays;
 import java.util.Scanner;
 
-class Client {
+class cbcPkcs7Attack {
 
     private Server server;
     private byte[] encryption;
@@ -17,14 +18,14 @@ class Client {
     private int block;
 
     public static void main(String[] args) {
-        new Client();
+        new cbcPkcs7Attack();
     }
 
-    public Client() {
+    public cbcPkcs7Attack() {
         server = new Server(new NormalCBCMode());
         scanner = new Scanner(System.in);
 
-        encryption = server.listen();
+        encryption = server.getCipherText();
         encSubArr = Arrays.copyOfRange(encryption.clone(), encryption.length - 32, encryption.length);
         fakeEnc = Arrays.copyOfRange(encryption.clone(), encryption.length - 32, encryption.length);
         intermediate = new int[encSubArr.length];

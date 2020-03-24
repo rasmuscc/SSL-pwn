@@ -1,6 +1,6 @@
 package abstractfactories;
 
-import strategyimplementations.CTRModeStrategy;
+import modeOfOperations.CTRModeStrategy;
 import strategyinterfaces.ModeStrategy;
 import strategyinterfaces.PaddingStrategy;
 
