@@ -20,7 +20,7 @@ class Client {
         new Client();
     }
 
-    public Client() {
+    private Client() {
         server = new Server(new NormalCBCMode());
         scanner = new Scanner(System.in);
 
@@ -90,6 +90,7 @@ class Client {
                 } else {
                     paddingSize = 0;
                 }
+
                 if (paddingSize > 1) {
                     for (int j = 0; j < paddingSize; j++) {
                         padI[15 - j] = (byte) (padDelta[15 - j] ^ (byte) paddingSize);
@@ -131,10 +132,12 @@ class Client {
                     byte[] temp = fakeEnc.clone();
                     temp[pos - 16 - j] = (byte) i;
                     if (server.isPaddingCorrect(temp)) {
+                        paddingSize = j + 1;
                         padDelta[15 - j] = (byte) i;
-                        paddingSize++;
                         temp[pos - 16 - j] = (byte) 257;
                         if (server.isPaddingCorrect(temp)) {
+                            System.out.println(paddingSize);
+                            paddingSize--;
                             escape = true;
                             break;
                         }
