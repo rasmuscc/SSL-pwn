@@ -52,7 +52,7 @@ class cbcPkcs7Attack {
 
             if (iter == 1 && block == 1) {
                 // first find out size of padding
-                getNextByte(startPos, iter);
+                findPadding(startPos);
                 System.out.println("Padding of size " + iter + " is now removed");
                 System.out.println("Press enter to continue or say no to exit");
             } else {
@@ -80,52 +80,64 @@ class cbcPkcs7Attack {
         }
     }
 
+    /**
+     * find padding and make arrays ready for finding next byte
+     * @param pos posttion in arrays
+     */
+    private void findPadding(int pos) {
+
+        // get size of padding
+        int paddingSize = getPaddingSize(pos);
+
+        // make intermediate array for padding
+        for (int j = 0; j < paddingSize; j++) {
+            padI[(blockSize - 1) - j] = (byte) (padDelta[(blockSize - 1) - j] ^ (byte) paddingSize);
+        }
+
+        // insert padding intermediates into intermediate array
+        System.arraycopy(padI, padI.length - paddingSize, intermediate, intermediate.length - paddingSize, paddingSize);
+
+        // calculate new byte representation for next iteration
+        for (int j = 0; j < paddingSize; j++) {
+            tempEnc[(blockSize - 1) - j] = (byte) (padI[(blockSize - 1) - j] ^ (byte) paddingSize + 1);
+        }
+
+        // setting iter to padding size to skip padding
+        iter = paddingSize;
+    }
+
+
+    /**
+     * getting next byte from ciphertext by finding which byte make a valid padding and prepares for next byte
+     * @param pos position in arrays
+     * @param iteration posistion in block
+     * @return res the next plaintext byte in original message
+     */
     private String getNextByte(int pos, int iteration) {
 
         String res = "";
-        // check padding first
-        if (block == 1 && iteration == 1) {
 
-            // get size of padding
-            int paddingSize = getPaddingSize(pos);
+        // guess byte to get a valid padding
+        for (int i = 0; i < 256; i++) {
+            byte[] temp = tempEnc.clone();
+            temp[pos - blockSize] = (byte) i;
 
-            // make intermediate array for padding
-            for (int j = 0; j < paddingSize; j++) {
-                padI[(blockSize - 1) - j] = (byte) (padDelta[(blockSize - 1) - j] ^ (byte) paddingSize);
-            }
+            if (server.isPaddingCorrect(temp)) {
 
-            // insert padding intermediates into intermediate array
-            System.arraycopy(padI, padI.length - paddingSize, intermediate, intermediate.length - paddingSize, paddingSize);
+                // calculate intermediate for pos
+                intermediate[pos] = (byte) ((byte) i ^ (byte) iteration);
 
-            // calculate new byte representation for next iteration
-            for (int j = 0; j < paddingSize; j++) {
-                tempEnc[(blockSize - 1) - j] = (byte) (padI[(blockSize - 1) - j] ^ (byte) paddingSize + 1);
-            }
-
-            // setting iter to padding size to skip padding
-            iter = paddingSize;
-        } else {
-            // guess byte to get a valid padding
-            for (int i = 0; i < 256; i++) {
-                byte[] temp = tempEnc.clone();
-                temp[pos - blockSize] = (byte) i;
-
-                if (server.isPaddingCorrect(temp)) {
-
-                    // calculate intermediate for pos
-                    intermediate[pos] = (byte) ((byte) i ^ (byte) iteration);
-
-                    // calculate new byte representation for next iteration
-                    for (int j = 0; j < iteration; j++) {
-                        tempEnc[pos - blockSize + j] = (byte) (intermediate[pos + j] ^ (byte) iteration + 1);
-                    }
-
-                    // get original plaintext byte
-                    res = decrypt((byte) pos, intermediate[pos]);
-                    break;
+                // calculate new byte representation for next iteration
+                for (int j = 0; j < iteration; j++) {
+                    tempEnc[pos - blockSize + j] = (byte) (intermediate[pos + j] ^ (byte) iteration + 1);
                 }
+
+                // get original plaintext byte
+                res = decrypt((byte) pos, intermediate[pos]);
+                break;
             }
         }
+
 
         return res;
     }
