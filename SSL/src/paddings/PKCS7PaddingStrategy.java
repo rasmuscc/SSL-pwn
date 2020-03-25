@@ -1,4 +1,4 @@
-package strategyimplementations;
+package paddings;
 
 import strategyinterfaces.PaddingStrategy;
 

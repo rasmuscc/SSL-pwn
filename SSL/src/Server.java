@@ -4,10 +4,10 @@ import strategyinterfaces.ModeStrategy;
 import strategyinterfaces.PaddingStrategy;
 
 
-class Server {
+public class Server {
     private PaddingStrategy paddingStrategy;
     private ModeStrategy modeStrategy;
-    private byte[] encryption;
+    private byte[] cipherText;
 
     public static void main(String[] args) {
         new Server(new NormalCBCMode());
@@ -17,12 +17,13 @@ class Server {
         paddingStrategy = abstractFactory.getPaddingStrategy();
         modeStrategy = abstractFactory.getModeStrategy();
 
-        encryption = modeStrategy.encrypt("Insert some message here to test");
+        cipherText = modeStrategy.encrypt("jesper Elsker Modne Meloner");
     }
 
-    public byte[] listen() {
-        return encryption;
+    public byte[] getCipherText() {
+        return cipherText;
     }
+
 
     public boolean isPaddingCorrect(byte[] enc) {
         byte[] decryption = modeStrategy.decrypt(enc);

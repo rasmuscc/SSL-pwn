@@ -3,10 +3,10 @@ import abstractfactories.NormalCBCMode;
 import java.util.Arrays;
 import java.util.Scanner;
 
-class Client {
+class cbcPkcs7Attack {
 
     private Server server;
-    private byte[] encryption;
+    private byte[] cipherText;
     private byte[] fakeEnc;
     private byte[] encSubArr;
     private int[] intermediate;
@@ -17,26 +17,26 @@ class Client {
     private int block;
 
     public static void main(String[] args) {
-        new Client();
+        new cbcPkcs7Attack();
     }
 
-    private Client() {
+    public cbcPkcs7Attack() {
         server = new Server(new NormalCBCMode());
         scanner = new Scanner(System.in);
 
-        encryption = server.listen();
-        encSubArr = Arrays.copyOfRange(encryption.clone(), encryption.length - 32, encryption.length);
-        fakeEnc = Arrays.copyOfRange(encryption.clone(), encryption.length - 32, encryption.length);
+        cipherText = server.getCipherText();
+        encSubArr = Arrays.copyOfRange(cipherText.clone(), cipherText.length - 32, cipherText.length);
+        fakeEnc = Arrays.copyOfRange(cipherText.clone(), cipherText.length - 32, cipherText.length);
         intermediate = new int[encSubArr.length];
 
-        int numberOfBlocks = encryption.length / 16;
+        int numberOfBlocks = cipherText.length / 16;
         block = 1;
 
         int startPos;
         iter = 1;
 
         String plaintext = "";
-        System.out.println("Encrypted message: " + new String(encryption));
+        System.out.println("Encrypted message: " + new String(cipherText));
         System.out.println("First remove padding");
         System.out.println("Press enter to continue or say no to exit");
         while (scanner.hasNextLine()) {
@@ -57,8 +57,8 @@ class Client {
             iter++;
             if (iter == 17 && block + 1 != numberOfBlocks) {
                 block++;
-                fakeEnc = Arrays.copyOfRange(encryption.clone(), encryption.length - 16 - (block * 16), encryption.length - ((block - 1) * 16));
-                encSubArr = Arrays.copyOfRange(encryption.clone(), encryption.length - 16 - (block * 16), encryption.length - ((block - 1) * 16));
+                fakeEnc = Arrays.copyOfRange(cipherText.clone(), cipherText.length - 16 - (block * 16), cipherText.length - ((block - 1) * 16));
+                encSubArr = Arrays.copyOfRange(cipherText.clone(), cipherText.length - 16 - (block * 16), cipherText.length - ((block - 1) * 16));
                 intermediate = new int[fakeEnc.length];
                 iter = 1;
             } else if (iter == 17 && block + 1 == numberOfBlocks) {

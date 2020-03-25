@@ -1,7 +1,7 @@
 package abstractfactories;
 
-import strategyimplementations.CBCModeStrategy;
-import strategyimplementations.PKCS7PaddingStrategy;
+import modeOfOperations.CBCModeStrategy;
+import paddings.PKCS7PaddingStrategy;
 import strategyinterfaces.ModeStrategy;
 import strategyinterfaces.PaddingStrategy;
 

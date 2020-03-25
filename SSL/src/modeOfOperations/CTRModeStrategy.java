@@ -1,4 +1,4 @@
-package strategyimplementations;
+package modeOfOperations;
 
 import strategyinterfaces.ModeStrategy;
 
