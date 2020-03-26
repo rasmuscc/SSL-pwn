@@ -28,12 +28,24 @@ public class PKCS7PaddingStrategy implements PaddingStrategy {
 	}
 
 	@Override
-	public byte[] getPadding(int length) {
-		byte[] padding = new byte[length];
-		for (int i = 0; i < length; i++) {
-			padding[i] = charPadding[length - 1];
+	public byte[] getPadding(int blockSize, byte[] data) {
+		// Get size of padding that needs to go on last block
+		int paddingSize = blockSize - data.length % blockSize;
+
+		byte[] padding = new byte[paddingSize];
+		for (int i = 0; i < paddingSize; i++) {
+			padding[i] = charPadding[paddingSize - 1];
 		}
-		return padding;
+
+		int paddedDataLength = data.length + paddingSize;
+		byte[] paddedData = new byte[paddedDataLength];
+
+		System.arraycopy(padding, 0, paddedData, data.length, padding.length);
+
+		System.arraycopy(data, 0, paddedData, 0, data.length);
+
+
+		return paddedData;
 	}
 
 	@Override

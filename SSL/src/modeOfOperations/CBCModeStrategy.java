@@ -42,22 +42,12 @@ public class CBCModeStrategy implements ModeStrategy {
 
 		int numberOfBlocks = (dataAsByteArray.length / blockSize) + 1;
 
-		// Get size of padding that needs to go on last block
-		int paddingSize = blockSize - dataAsByteArray.length % blockSize;
-
 		byte[] iv = IV;
 
-		int paddedDataLength = dataAsByteArray.length + paddingSize;
-		byte[] paddedData = new byte[paddedDataLength];
-
 		// Add padding to the last block
-		byte[] padding = paddingStrategy.getPadding(paddingSize);
+		byte[] paddedData = paddingStrategy.getPadding(blockSize, dataAsByteArray);
 
-		System.arraycopy(padding, 0, paddedData, dataAsByteArray.length, padding.length);
-
-		System.arraycopy(dataAsByteArray, 0, paddedData, 0, dataAsByteArray.length);
-
-		byte[] encryptedData = new byte[paddedDataLength + iv.length];
+		byte[] encryptedData = new byte[paddedData.length + iv.length];
 
 		for (int i = 0; i < numberOfBlocks; i++) {
 			byte[] blockToEncrypt = Arrays.copyOfRange(paddedData, i * 16, (i + 1) * 16);

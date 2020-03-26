@@ -2,7 +2,7 @@ package strategyinterfaces;
 
 public interface PaddingStrategy {
 
-	byte[] getPadding(int length);
+	byte[] getPadding(int blockSize, byte[] data);
 
 	boolean checkPadding(byte[] decryptedData);
 }
