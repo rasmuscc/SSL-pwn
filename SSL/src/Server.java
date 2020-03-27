@@ -17,7 +17,12 @@ public class Server {
         paddingStrategy = abstractFactory.getPaddingStrategy();
         modeStrategy = abstractFactory.getModeStrategy();
 
-        cipherText = modeStrategy.encrypt("Rasmus ser gay porno");
+        try {
+            cipherText = modeStrategy.encrypt("Rasmus ser gay porno med Jannick");
+        } catch (Exception e) {
+
+        }
+
     }
 
     public byte[] getCipherText() {
@@ -26,7 +31,12 @@ public class Server {
 
 
     public boolean isPaddingCorrect(byte[] enc) {
-        byte[] decryption = modeStrategy.decrypt(enc);
+        byte[] decryption = null;
+        try {
+            decryption = modeStrategy.decrypt(enc);
+        } catch (Exception e) {
+
+        }
 
         return paddingStrategy.checkPadding(decryption);
     }

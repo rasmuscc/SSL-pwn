@@ -3,20 +3,25 @@ package modeOfOperations;
 import strategyinterfaces.ModeStrategy;
 import strategyinterfaces.PaddingStrategy;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
 import java.util.Random;
 
 public class CBCModeStrategy implements ModeStrategy {
 
 	private final int blockSize = 16;
-	private byte[] key = null;
+	private SecretKeySpec key;
 	private byte[] IV;
+	IvParameterSpec ivParam;
+	private Cipher cipher;
 	private PaddingStrategy paddingStrategy;
-	private char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
 	public CBCModeStrategy(PaddingStrategy paddingStrategy) {
 		setKey("1234567812345678");
 		IV = getIV();
+		ivParam = new IvParameterSpec(IV);
 		this.paddingStrategy = paddingStrategy;
 	}
 
@@ -34,11 +39,11 @@ public class CBCModeStrategy implements ModeStrategy {
 	}
 
 	private void setKey(String initKey) {
-		key = initKey.getBytes();
+		key = new SecretKeySpec(initKey.getBytes(), "AES");
 	}
 
 	@Override
-	public byte[] encrypt(String data) {
+	public byte[] encrypt(String data) throws Exception {
 		byte[] dataAsByteArray = data.getBytes();
 
 		int numberOfBlocks = (dataAsByteArray.length / blockSize) + 1;
@@ -63,23 +68,24 @@ public class CBCModeStrategy implements ModeStrategy {
 
 	}
 
-	private byte[] encryptBlockCBC(byte[] block, byte[] prevBlock){
+	private byte[] encryptBlockCBC(byte[] block, byte[] prevBlock) throws Exception{
 		byte[] encryptedBlock = new byte[blockSize];
+
+		cipher = Cipher.getInstance("AES/CBC/NoPadding");
+		cipher.init(Cipher.ENCRYPT_MODE, key, ivParam);
 
 		// Xor with previous block
 		for (int i = 0; i < blockSize; i++) {
 			encryptedBlock[i] = (byte) ((int) block[i] ^ (int) prevBlock[i]);
 		}
 
-		// Encrypt using caesar variant (shit but irrelevant for POC)
-		for (int i = 0; i < blockSize; i++) {
-			encryptedBlock[i] = (byte) ((int) encryptedBlock[i] ^ (int) key[i]);
-		}
+		// Encrypt using AES
+		encryptedBlock = cipher.doFinal(encryptedBlock);
 
 		return encryptedBlock;
 	}
 
-	public byte[] decrypt(byte[] cipher) {
+	public byte[] decrypt(byte[] cipher) throws Exception {
 		byte[] decryptedData = new byte[cipher.length];
 		int numberOfBlocks = cipher.length / blockSize;
 
@@ -96,13 +102,12 @@ public class CBCModeStrategy implements ModeStrategy {
 		return decryptedData;
 	}
 
-	private byte[] decryptBlockCBC(byte[] block, byte[] prevBlock) {
+	private byte[] decryptBlockCBC(byte[] block, byte[] prevBlock) throws Exception {
 		byte[] decryptedBlock = new byte[blockSize];
 
-		// Encrypt using caesar variant (shit but irrelevant for POC)
-		for (int i = 0; i < blockSize; i++) {
-			decryptedBlock[i] = (byte) ((int) block[i] ^ (int) key[i]);
-		}
+		// Decrypt using AES
+		cipher.init(Cipher.DECRYPT_MODE, key, ivParam);
+		decryptedBlock = cipher.doFinal(block);
 
 		// Xor with previous block
 		for (int i = 0; i < blockSize; i++) {
