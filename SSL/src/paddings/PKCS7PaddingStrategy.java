@@ -67,8 +67,8 @@ public class PKCS7PaddingStrategy implements PaddingStrategy {
 	}
 
 	private boolean counter(byte[] padding, int length) {
-		boolean res = false;
-		for (int i = 15; i > 15 - length; i--) {
+		boolean res = true;
+		for (int i = 14; i > 15 - length; i--) {
 			res = padding[i] == charPadding[length - 1];
 			if (!res) break;
 		}

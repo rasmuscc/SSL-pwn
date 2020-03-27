@@ -91,7 +91,7 @@ class cbcPkcs7Attack {
 
         // make intermediate array for padding
         for (int j = 0; j < paddingSize; j++) {
-            padI[(blockSize - 1) - j] = (byte) (padDelta[(blockSize - 1) - j] ^ (byte) paddingSize);
+            padI[(blockSize - 1) - j] = ((int) padDelta[(blockSize - 1) - j] ^ paddingSize);
         }
 
         // insert padding intermediates into intermediate array
@@ -99,7 +99,7 @@ class cbcPkcs7Attack {
 
         // calculate new byte representation for next iteration
         for (int j = 0; j < paddingSize; j++) {
-            tempEnc[(blockSize - 1) - j] = (byte) (padI[(blockSize - 1) - j] ^ (byte) paddingSize + 1);
+            tempEnc[(blockSize - 1) - j] = (byte) (padI[(blockSize - 1) - j] ^ paddingSize + 1);
         }
 
         // setting iter to padding size to skip padding
@@ -118,18 +118,18 @@ class cbcPkcs7Attack {
         String res = "";
 
         // guess byte to get a valid padding
-        for (int i = 0; i < 256; i++) {
+        for (int i = 0; i < 257; i++) {
             byte[] temp = tempEnc.clone();
             temp[pos - blockSize] = (byte) i;
-
             if (server.isPaddingCorrect(temp)) {
 
                 // calculate intermediate for pos
-                intermediate[pos] = (byte) ((byte) i ^ (byte) iteration);
+                intermediate[pos] = (byte) (i ^ iteration);
+                //System.out.println(intermediate[pos]);
 
                 // calculate new byte representation for next iteration
                 for (int j = 0; j < iteration; j++) {
-                    tempEnc[pos - blockSize + j] = (byte) (intermediate[pos + j] ^ (byte) iteration + 1);
+                    tempEnc[pos - blockSize + j] = (byte) (intermediate[pos + j] ^ iteration + 1);
                 }
 
                 // get original plaintext byte
@@ -182,7 +182,7 @@ class cbcPkcs7Attack {
 
 
     private String decrypt(int pos, int inter) {
-        return new String(new byte[] { (byte) (encSubArr[pos - blockSize] ^ inter) });
+        return new String(new byte[] { (byte) ((int) encSubArr[pos - blockSize] ^ inter) });
     }
 
 }

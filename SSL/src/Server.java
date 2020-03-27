@@ -17,7 +17,7 @@ public class Server {
         paddingStrategy = abstractFactory.getPaddingStrategy();
         modeStrategy = abstractFactory.getModeStrategy();
 
-        cipherText = modeStrategy.encrypt("jesper Elsker Modne Meloner");
+        cipherText = modeStrategy.encrypt("Rasmus ser gay porno");
     }
 
     public byte[] getCipherText() {

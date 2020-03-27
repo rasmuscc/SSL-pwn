@@ -21,14 +21,15 @@ public class CBCModeStrategy implements ModeStrategy {
 	}
 
 
-	public byte[] getIV() {
+	private byte[] getIV() {
 		// Should be random, but for testing we make it static
 		byte[] iv = new byte[blockSize];
 		Random random = new Random();
+
 		for (int i = 0; i < blockSize; i++) {
-			iv[i] = (byte) (random.nextInt(256) + 1);
-			//iv[i] = (byte) alphabet[random.nextInt(alphabet.length - 1)];
+			iv[i] = (byte) (random.nextInt(256));
 		}
+
 		return iv;
 	}
 
@@ -67,12 +68,12 @@ public class CBCModeStrategy implements ModeStrategy {
 
 		// Xor with previous block
 		for (int i = 0; i < blockSize; i++) {
-			encryptedBlock[i] = (byte) (block[i] ^ prevBlock[i]);
+			encryptedBlock[i] = (byte) ((int) block[i] ^ (int) prevBlock[i]);
 		}
 
 		// Encrypt using caesar variant (shit but irrelevant for POC)
 		for (int i = 0; i < blockSize; i++) {
-			encryptedBlock[i] = (byte) (encryptedBlock[i] ^ key[i]);
+			encryptedBlock[i] = (byte) ((int) encryptedBlock[i] ^ (int) key[i]);
 		}
 
 		return encryptedBlock;
@@ -100,12 +101,12 @@ public class CBCModeStrategy implements ModeStrategy {
 
 		// Encrypt using caesar variant (shit but irrelevant for POC)
 		for (int i = 0; i < blockSize; i++) {
-			decryptedBlock[i] = (byte) (block[i] ^ key[i]);
+			decryptedBlock[i] = (byte) ((int) block[i] ^ (int) key[i]);
 		}
 
 		// Xor with previous block
 		for (int i = 0; i < blockSize; i++) {
-			decryptedBlock[i] = (byte) (decryptedBlock[i] ^ prevBlock[i]);
+			decryptedBlock[i] = (byte) ((int) decryptedBlock[i] ^ (int) prevBlock[i]);
 		}
 
 
