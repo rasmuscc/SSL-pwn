@@ -54,12 +54,14 @@ class cbcPkcs7Attack {
                 // first find out size of padding
                 findPadding(startPos);
                 System.out.println("Padding of size " + iter + " is now removed");
+                System.out.println("Number of queries made: " + server.getQueries());
                 System.out.println("Press enter to continue or say no to exit");
             } else {
                 // update plaintext with next byte
                 plaintext = getNextByte(startPos, iter) + plaintext;
 
                 System.out.println("Recovered plaintext is now: " + plaintext);
+                System.out.println("Number of queries made: " + server.getQueries());
                 System.out.println("Press enter to continue or say no to exit");
             }
             iter++;

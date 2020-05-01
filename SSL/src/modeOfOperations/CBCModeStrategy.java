@@ -32,8 +32,27 @@ public class CBCModeStrategy implements ModeStrategy {
 		Random random = new Random();
 
 		for (int i = 0; i < blockSize; i++) {
-			iv[i] = (byte) (random.nextInt(256));
+			iv[i] = (byte) (random.nextInt(256) + 1);
 		}
+		/*
+		-69
+		124
+		29
+		-124
+		-119
+		-95
+		42
+		-51
+		121
+		10
+		-102
+		34
+		26
+		91
+		-48
+		58
+		 */
+		System.out.println(iv[15]);
 
 		return iv;
 	}
@@ -46,6 +65,7 @@ public class CBCModeStrategy implements ModeStrategy {
 	public byte[] encrypt(String data) throws Exception {
 		byte[] dataAsByteArray = data.getBytes();
 
+
 		int numberOfBlocks = (dataAsByteArray.length / blockSize) + 1;
 
 		byte[] iv = IV;
@@ -54,7 +74,7 @@ public class CBCModeStrategy implements ModeStrategy {
 		byte[] paddedData = paddingStrategy.getPadding(blockSize, dataAsByteArray);
 
 		byte[] encryptedData = new byte[paddedData.length + iv.length];
-
+		System.out.println(paddedData[paddedData.length-16]);
 		for (int i = 0; i < numberOfBlocks; i++) {
 			byte[] blockToEncrypt = Arrays.copyOfRange(paddedData, i * 16, (i + 1) * 16);
 			byte[] encryptedBlock = encryptBlockCBC(blockToEncrypt, iv);
@@ -76,7 +96,7 @@ public class CBCModeStrategy implements ModeStrategy {
 
 		// Xor with previous block
 		for (int i = 0; i < blockSize; i++) {
-			encryptedBlock[i] = (byte) ((int) block[i] ^ (int) prevBlock[i]);
+			encryptedBlock[i] = (byte) (block[i] ^ prevBlock[i]);
 		}
 
 		// Encrypt using AES
@@ -111,7 +131,7 @@ public class CBCModeStrategy implements ModeStrategy {
 
 		// Xor with previous block
 		for (int i = 0; i < blockSize; i++) {
-			decryptedBlock[i] = (byte) ((int) decryptedBlock[i] ^ (int) prevBlock[i]);
+			decryptedBlock[i] = (byte) ( decryptedBlock[i] ^ prevBlock[i]);
 		}
 
 

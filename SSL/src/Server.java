@@ -8,6 +8,7 @@ public class Server {
     private PaddingStrategy paddingStrategy;
     private ModeStrategy modeStrategy;
     private byte[] cipherText;
+    private int queries;
 
     public static void main(String[] args) {
         new Server(new NormalCBCMode());
@@ -18,7 +19,8 @@ public class Server {
         modeStrategy = abstractFactory.getModeStrategy();
 
         try {
-            cipherText = modeStrategy.encrypt("Rasmus ser gay porno med Jannick");
+            cipherText = modeStrategy.encrypt("Rasmus ser gay porno med Jannick!");
+            System.out.println(new String(modeStrategy.decrypt(cipherText)));
         } catch (Exception e) {
 
         }
@@ -29,8 +31,12 @@ public class Server {
         return cipherText;
     }
 
+    public int getQueries() {
+        return queries;
+    }
 
     public boolean isPaddingCorrect(byte[] enc) {
+        queries++;
         byte[] decryption = null;
         try {
             decryption = modeStrategy.decrypt(enc);
