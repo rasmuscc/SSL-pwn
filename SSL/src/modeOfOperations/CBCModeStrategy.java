@@ -34,25 +34,6 @@ public class CBCModeStrategy implements ModeStrategy {
 		for (int i = 0; i < blockSize; i++) {
 			iv[i] = (byte) (random.nextInt(256) + 1);
 		}
-		/*
-		-69
-		124
-		29
-		-124
-		-119
-		-95
-		42
-		-51
-		121
-		10
-		-102
-		34
-		26
-		91
-		-48
-		58
-		 */
-		System.out.println(iv[15]);
 
 		return iv;
 	}
@@ -74,7 +55,6 @@ public class CBCModeStrategy implements ModeStrategy {
 		byte[] paddedData = paddingStrategy.getPadding(blockSize, dataAsByteArray);
 
 		byte[] encryptedData = new byte[paddedData.length + iv.length];
-		System.out.println(paddedData[paddedData.length-16]);
 		for (int i = 0; i < numberOfBlocks; i++) {
 			byte[] blockToEncrypt = Arrays.copyOfRange(paddedData, i * 16, (i + 1) * 16);
 			byte[] encryptedBlock = encryptBlockCBC(blockToEncrypt, iv);

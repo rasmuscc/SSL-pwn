@@ -30,7 +30,7 @@ class cbcPkcs7Attack {
         // make sub arrays for calculations
         encSubArr = Arrays.copyOfRange(cipherText.clone(), cipherText.length - 2 * blockSize, cipherText.length);
         tempEnc = Arrays.copyOfRange(cipherText.clone(), cipherText.length - 2 * blockSize, cipherText.length);
-
+        // array for storing the bytes of the intermediate representation
         intermediate = new int[encSubArr.length];
 
         int numberOfBlocks = cipherText.length / blockSize;
@@ -158,7 +158,7 @@ class cbcPkcs7Attack {
             byte[] temp = tempEnc.clone();
             temp[pos - blockSize - j] = (byte) 257;
 
-            // if not valid padding is broken and size is found
+            // if not valid, padding is broken and size is found
             if (!server.isPaddingCorrect(temp)) {
                 paddingSize = j + 1;
                 break;
@@ -167,16 +167,7 @@ class cbcPkcs7Attack {
 
         // getting deltas for padding
         for (int j = 0; j < paddingSize; j++) {
-            for (int i = 0; i < 257; i++) {
-                byte[] temp = tempEnc.clone();
-                temp[pos - blockSize - j] = (byte) i;
-
-                // if valid then delta is i
-                if (server.isPaddingCorrect(temp)) {
-                    padDelta[(blockSize - 1) - j] = (byte) i;
-                    break;
-                }
-            }
+            padDelta[(blockSize - 1) - j] = encSubArr[(blockSize - 1) - j];
         }
 
         return paddingSize;
