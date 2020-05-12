@@ -120,7 +120,7 @@ class cbcPkcs7Attack {
         String res = "";
 
         // guess byte to get a valid padding
-        for (int i = 0; i < 257; i++) {
+        for (int i = 0; i < 256; i++) {
             byte[] temp = tempEnc.clone();
             temp[pos - blockSize] = (byte) i;
             if (server.isPaddingCorrect(temp)) {
@@ -156,7 +156,7 @@ class cbcPkcs7Attack {
         // changing bytes to something illegal to see when padding is not valid
         for (int j = (blockSize - 1); j > -1; j--) {
             byte[] temp = tempEnc.clone();
-            temp[pos - blockSize - j] = (byte) 257;
+            temp[pos - blockSize - j] = (byte) (blockSize + 1);
 
             // if not valid, padding is broken and size is found
             if (!server.isPaddingCorrect(temp)) {

@@ -32,7 +32,7 @@ public class CBCModeStrategy implements ModeStrategy {
 		Random random = new Random();
 
 		for (int i = 0; i < blockSize; i++) {
-			iv[i] = (byte) (random.nextInt(256) + 1);
+			iv[i] = (byte) (random.nextInt(255));
 		}
 
 		return iv;
@@ -103,7 +103,7 @@ public class CBCModeStrategy implements ModeStrategy {
 	}
 
 	private byte[] decryptBlockCBC(byte[] block, byte[] prevBlock) throws Exception {
-		byte[] decryptedBlock = new byte[blockSize];
+		byte[] decryptedBlock;
 
 		// Decrypt using AES
 		cipher.init(Cipher.DECRYPT_MODE, key, ivParam);

@@ -9,22 +9,22 @@ public class PKCS7PaddingStrategy implements PaddingStrategy {
 	public PKCS7PaddingStrategy() {
 		charPadding = new byte[16];
 
-		charPadding[0] = (byte) ('\u0001');
-		charPadding[1] = (byte) ('\u0002');
-		charPadding[2] = (byte) ('\u0003');
-		charPadding[3] = (byte) ('\u0004');
-		charPadding[4] = (byte) ('\u0005');
-		charPadding[5] = (byte) ('\u0006');
-		charPadding[6] = (byte) ('\u0007');
-		charPadding[7] = (byte) ('\u0008');
-		charPadding[8] = (byte) ('\u0009');
-		charPadding[9] = (byte) ('\n');
-		charPadding[10] = (byte) ('\u000B');
-		charPadding[11] = (byte) ('\u000C');
-		charPadding[12] = (byte) ('\r');
-		charPadding[13] = (byte) ('\u000E');
-		charPadding[14] = (byte) ('\u000F');
-		charPadding[15] = (byte) ('\u0010');
+		charPadding[0] = (byte) 1;
+		charPadding[1] = (byte) 2;
+		charPadding[2] = (byte) 3;
+		charPadding[3] = (byte) 4;
+		charPadding[4] = (byte) 5;
+		charPadding[5] = (byte) 6;
+		charPadding[6] = (byte) 7;
+		charPadding[7] = (byte) 8;
+		charPadding[8] = (byte) 9;
+		charPadding[9] = (byte) 10;
+		charPadding[10] = (byte) 11;
+		charPadding[11] = (byte) 12;
+		charPadding[12] = (byte) 13;
+		charPadding[13] = (byte) 14;
+		charPadding[14] = (byte) 15;
+		charPadding[15] = (byte) 16;
 	}
 
 	@Override
