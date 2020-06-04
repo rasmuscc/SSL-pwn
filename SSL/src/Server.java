@@ -10,20 +10,17 @@ public class Server {
     private byte[] cipherText;
     private int queries;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         new Server(new NormalCBCMode());
     }
 
-    public Server(AbstractFactory abstractFactory) {
+    public Server(AbstractFactory abstractFactory) throws Exception {
+        // Setup encryption and padding scheme
         paddingStrategy = abstractFactory.getPaddingStrategy();
         modeStrategy = abstractFactory.getModeStrategy();
 
-        try {
-            cipherText = modeStrategy.encrypt("The handshake protocol in TLS, is a protocol made to ensure a secure encryption and authenticity between a client and a server using HTTPS communication this is called the key exchange, as the name of the protocol implies, a handshake is made to agree on how the communication should be done, they agree on which version of TLS or even SSL they are going to use, they also agrees on cipher suites, the authenticity of the server is checked by the client using the servers public key and certificate, and once all this is agreed upon/checked, the two parties generate session keys for symmetric encryption after the handshake is complete.");
-            System.out.println(new String(modeStrategy.decrypt(cipherText)));
-        } catch (Exception e) {
-
-        }
+        cipherText = modeStrategy.encrypt("The handshake protocol in TLS, is a protocol made to ensure a secure encryption and authenticity between a client and a server using HTTPS communication this is called the key exchange, as the name of the protocol implies, a handshake is made to agree on how the communication should be done, they agree on which version of TLS or even SSL they are going to use, they also agrees on cipher suites, the authenticity of the server is checked by the client using the servers public key and certificate, and once all this is agreed upon/checked, the two parties generate session keys for symmetric encryption after the handshake is complete.");
+        System.out.println(new String(modeStrategy.decrypt(cipherText)));
 
     }
 
@@ -35,16 +32,14 @@ public class Server {
         return queries;
     }
 
-    public boolean isPaddingCorrect(byte[] enc) {
+    public boolean isPaddingCorrect(byte[] enc) throws Exception {
         queries++;
-        byte[] decryption = null;
-        try {
-            decryption = modeStrategy.decrypt(enc);
-        } catch (Exception e) {
+        byte[] decryption = modeStrategy.decrypt(enc);
 
-        }
+        byte[] padding = new byte[16];
+        System.arraycopy(decryption, decryption.length-16, padding, 0, 16);
 
-        return paddingStrategy.checkPadding(decryption);
+        return paddingStrategy.checkPadding(padding);
     }
 
 }

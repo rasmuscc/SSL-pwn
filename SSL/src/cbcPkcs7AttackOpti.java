@@ -18,17 +18,18 @@ class cbcPkcs7AttackOpti {
 	private int block;
 	private String freqAlpha = "etaoinshrdlcumwfgypbvkjxqzETAOINSHRDLCUMWFGYPBVKJXQZ0123456789 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}";
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		new cbcPkcs7AttackOpti();
 	}
 
-	public cbcPkcs7AttackOpti() {
+	public cbcPkcs7AttackOpti() throws Exception {
 		server = new Server(new NormalCBCMode());
 		scanner = new Scanner(System.in);
 
 		cipherText = server.getCipherText();
 
 		// make sub arrays for calculations
+		// 32 bytes of original encryption encSubArr stays the same and tempEnc is manipulated one byte at a time
 		encSubArr = Arrays.copyOfRange(cipherText.clone(), cipherText.length - 2 * blockSize, cipherText.length);
 		tempEnc = Arrays.copyOfRange(cipherText.clone(), cipherText.length - 2 * blockSize, cipherText.length);
 		// array for storing the bytes of the intermediate representation
@@ -47,6 +48,7 @@ class cbcPkcs7AttackOpti {
 		System.out.println("Encrypted message: " + new String(cipherText));
 		System.out.println("First remove padding");
 		System.out.println("Press enter to continue or say no to exit");
+		// decrypts 1 block at a time
 		while (scanner.hasNextLine()) {
 			if (scanner.nextLine().equals("no")) {
 				break;
@@ -58,6 +60,7 @@ class cbcPkcs7AttackOpti {
 				findPadding(startPos);
 				System.out.println("Padding of size " + iter + " is now removed");
 				padding = iter;
+				// get remaining plaintext of first block
 				for (int i = iter; i < blockSize + 1; i++) {
 					startPos = tempEnc.length - i;
 					plaintext = getNextByte(startPos, i) + plaintext;
@@ -98,7 +101,7 @@ class cbcPkcs7AttackOpti {
 	 * find padding and make arrays ready for finding next byte
 	 * @param pos posttion in arrays
 	 */
-	private void findPadding(int pos) {
+	private void findPadding(int pos) throws Exception {
 
 		// get size of padding
 		int paddingSize = getPaddingSize(pos);
@@ -122,19 +125,23 @@ class cbcPkcs7AttackOpti {
 
 
 	/**
-	 * getting next byte from ciphertext by finding which byte make a valid padding and prepares for next byte
+	 * Gets next byte from ciphertext by finding which byte from the last block makes a valid padding and setup the last block for next byte
+	 * Is optimized using a freqAlpha array containing frequent characters in order of most used, and computes a delta using that character
 	 * @param pos position in arrays
 	 * @param iteration posistion in block
 	 * @return res the next plaintext byte in original message
 	 */
-	private String getNextByte(int pos, int iteration) {
+	private String getNextByte(int pos, int iteration) throws Exception {
 
 		String res = "";
+		// bool to know if plaintext we are trying to recover is not part of the freqAlpha array
 		boolean notFound = true;
 
 		// guess byte to get a valid padding
 		byte[] temp = tempEnc.clone();
+		// starts with freqAlpha array in order
 		for (int i = 0; i < freqAlpha.length(); i++) {
+			// our guess delta if our freqAlpha character is correct
 			int delta = (byte) freqAlpha.charAt(i) ^ (byte) iteration ^ encSubArr[pos - blockSize];
 
 			temp[pos - blockSize] = (byte) delta;
@@ -148,21 +155,25 @@ class cbcPkcs7AttackOpti {
 					tempEnc[pos - blockSize + j] = (byte) (intermediate[pos + j] ^ iteration + 1);
 				}
 
-				// get original plaintext byte
-				res = decrypt((byte) pos, intermediate[pos]);
+				// get original plaintext byte, we know it is the from freqAlpha we just guessed
+				res = freqAlpha.charAt(i) + "";
+				// plaintext is found so no need to continue with other bytes
 				notFound = false;
 				break;
 			}
 		}
 
+		// find out how many bytes remains depending on our freqAlpha array
 		int remainingBytes = 256 - freqAlpha.length();
-
+		// starts where the freqAlpha array ends
 		int startingPos = freqAlpha.charAt(freqAlpha.length()-1);
 
 		if (notFound) {
 			for (int i = startingPos; i < startingPos + remainingBytes + 1; i++) {
+				// our guess is delta
 				int delta = (byte) i ^ (byte) iteration ^ encSubArr[pos - 16];
 				temp[pos - blockSize] = (byte) delta;
+
 				if (server.isPaddingCorrect(temp)) {
 
 					// calculate intermediate for pos
@@ -180,7 +191,7 @@ class cbcPkcs7AttackOpti {
 			}
 		}
 
-
+		// return recovered plaintext byte
 		return res;
 	}
 
@@ -190,7 +201,7 @@ class cbcPkcs7AttackOpti {
 	 * @param pos position in arrays
 	 * @return paddingSize
 	 */
-	private int getPaddingSize(int pos) {
+	private int getPaddingSize(int pos) throws Exception {
 		int paddingSize = 0;
 
 		// changing bytes to something illegal to see when padding is not valid
@@ -213,7 +224,12 @@ class cbcPkcs7AttackOpti {
 		return paddingSize;
 	}
 
-
+	/**
+	 * Returns the plaintext of byte on pos
+	 * @param pos position in arrays
+	 * @param inter intermediate byte
+	 * @return String of plaintext byte
+	 */
 	private String decrypt(int pos, int inter) {
 		return new String(new byte[] { (byte) ((int) encSubArr[pos - blockSize] ^ inter) });
 	}
