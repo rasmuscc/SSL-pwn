@@ -18,10 +18,11 @@ class cbcPkcs7Attack {
     private int block;
 
     public static void main(String[] args) throws Exception {
-        new cbcPkcs7Attack();
+        new cbcPkcs7Attack(false);
     }
 
-    public cbcPkcs7Attack() throws Exception {
+    public cbcPkcs7Attack(boolean isTesting) throws Exception {
+        // setup server with plaintext
         server = new Server(new NormalCBCMode());
         scanner = new Scanner(System.in);
 
@@ -38,48 +39,91 @@ class cbcPkcs7Attack {
         block = 1;
 
         int startPos;
+        int padding = 0;
         iter = 1;
 
         // begin plaintext recovery
         String plaintext = "";
-        System.out.println("Encrypted message: " + new String(cipherText));
-        System.out.println("First remove padding");
-        System.out.println("Press enter to continue or say no to exit");
-        while (scanner.hasNextLine()) {
-            if (scanner.nextLine().equals("no")) {
-                break;
+        if (!isTesting) {
+            System.out.println("Encrypted message: " + new String(cipherText));
+            System.out.println("First remove padding");
+            System.out.println("Press enter to continue or say no to exit");
+            while (scanner.hasNextLine()) {
+                if (scanner.nextLine().equals("no")) {
+                    break;
+                }
+                // position of the byte that is being recovered
+                startPos = tempEnc.length - iter;
+
+                if (iter == 1 && block == 1) {
+                    // first part of the encrypted message is padding
+                    findPadding(startPos);
+                    System.out.println("Padding of size " + iter + " is now removed");
+                    System.out.println("Number of queries made: " + server.getQueries());
+                    System.out.println("Press enter to continue or say no to exit");
+                } else {
+                    // getNextByte recovers the next byte and adds it in front of the plaintext
+                    plaintext = getNextByte(startPos, iter) + plaintext;
+
+                    System.out.println("Recovered plaintext is now: " + plaintext);
+                    System.out.println("Number of queries made: " + server.getQueries());
+                    System.out.println("Press enter to continue or say no to exit");
+                }
+                iter++;
+
+                if (iter == (blockSize + 1) && block + 1 != numberOfBlocks) {
+                    // if end of block is reached make new temporary arrays and increase block number (the arrays is just shifted 16 bytes)
+                    block++;
+                    tempEnc = Arrays.copyOfRange(cipherText.clone(), cipherText.length - blockSize - (block * blockSize), cipherText.length - ((block - 1) * blockSize));
+                    encSubArr = Arrays.copyOfRange(cipherText.clone(), cipherText.length - blockSize - (block * blockSize), cipherText.length - ((block - 1) * blockSize));
+                    intermediate = new int[tempEnc.length];
+                    // start over for next block
+                    iter = 1;
+                } else if (iter == (blockSize + 1) && block + 1 == numberOfBlocks) {
+                    // terminate if all blocks have been decrypted
+                    System.out.println("Full plaintext recovered: " + plaintext);
+                    break;
+                }
             }
-            // position of the byte that is being recovered
-            startPos = tempEnc.length - iter;
+        } else {
+            boolean cond = true;
 
-            if (iter == 1 && block == 1) {
-                // first part of the encrypted message is padding
-                findPadding(startPos);
-                System.out.println("Padding of size " + iter + " is now removed");
-                System.out.println("Number of queries made: " + server.getQueries());
-                System.out.println("Press enter to continue or say no to exit");
-            } else {
-                // getNextByte recovers the next byte and adds it in front of the plaintext
-                plaintext = getNextByte(startPos, iter) + plaintext;
+            while (cond) {
+                startPos = tempEnc.length - iter;
 
-                System.out.println("Recovered plaintext is now: " + plaintext);
-                System.out.println("Number of queries made: " + server.getQueries());
-                System.out.println("Press enter to continue or say no to exit");
-            }
-            iter++;
+                if (iter == 1 && block == 1) {
+                    // first find out size of padding
+                    findPadding(startPos);
+                    padding = iter;
+                    // get remaining plaintext of first block
+                    for (int i = iter; i < blockSize + 1; i++) {
+                        startPos = tempEnc.length - i;
+                        plaintext = getNextByte(startPos, i) + plaintext;
+                    }
+                } else {
+                    // update plaintext with next byte
+                    for (int i = iter; i < blockSize + 1; i++) {
+                        startPos = tempEnc.length - i;
+                        plaintext = getNextByte(startPos, i) + plaintext;
+                    }
+                }
 
-            if (iter == (blockSize + 1) && block + 1 != numberOfBlocks) {
-                // if end of block is reached make new temporary arrays and increase block number (the arrays is just shifted 16 bytes)
-                block++;
-                tempEnc = Arrays.copyOfRange(cipherText.clone(), cipherText.length - blockSize - (block * blockSize), cipherText.length - ((block - 1) * blockSize));
-                encSubArr = Arrays.copyOfRange(cipherText.clone(), cipherText.length - blockSize - (block * blockSize), cipherText.length - ((block - 1) * blockSize));
-                intermediate = new int[tempEnc.length];
-                // start over for next block
-                iter = 1;
-            } else if (iter == (blockSize + 1) && block + 1 == numberOfBlocks) {
-                // terminate if all blocks have been decrypted
-                System.out.println("Full plaintext recovered: " + plaintext);
-                break;
+                if (block + 1 != numberOfBlocks) {
+                    // if end of block is reached make new temporary arrays and increase block number
+                    block++;
+                    tempEnc = Arrays.copyOfRange(cipherText.clone(), cipherText.length - blockSize - (block * blockSize), cipherText.length - ((block - 1) * blockSize));
+                    encSubArr = Arrays.copyOfRange(cipherText.clone(), cipherText.length - blockSize - (block * blockSize), cipherText.length - ((block - 1) * blockSize));
+                    intermediate = new int[tempEnc.length];
+                    // start over for next block
+                    iter = 1;
+                } else if (block + 1 == numberOfBlocks) {
+                    // terminate if all blocks have been decrypted
+                    System.out.println("Number of queries made: " + server.getQueries());
+                    System.out.println("Average queries per byte including padding: " + 1.0 * server.getQueries()/(plaintext.length() + padding));
+                    cond = false;
+                    break;
+                }
+
             }
         }
     }
@@ -95,7 +139,7 @@ class cbcPkcs7Attack {
 
         // make intermediate array for padding
         for (int j = 0; j < paddingSize; j++) {
-            padI[(blockSize - 1) - j] = ((int) padDelta[(blockSize - 1) - j] ^ paddingSize);
+            padI[(blockSize - 1) - j] = ((int) padDelta[(blockSize - 1) - j] ^ (paddingSize - 1));
         }
 
         // insert padding intermediates into intermediate array
@@ -103,7 +147,7 @@ class cbcPkcs7Attack {
 
         // calculate new byte representation for next iteration
         for (int j = 0; j < paddingSize; j++) {
-            tempEnc[(blockSize - 1) - j] = (byte) (padI[(blockSize - 1) - j] ^ paddingSize + 1);
+            tempEnc[(blockSize - 1) - j] = (byte) (padI[(blockSize - 1) - j] ^ paddingSize);
         }
 
         // setting iter to padding size to skip padding
@@ -129,11 +173,11 @@ class cbcPkcs7Attack {
             if (server.isPaddingCorrect(temp)) {
 
                 // calculate intermediate for pos
-                intermediate[pos] = (byte) (i ^ iteration);
+                intermediate[pos] = (byte) (i ^ (iteration - 1));
 
                 // calculate new byte representation for next iteration
                 for (int j = 0; j < iteration; j++) {
-                    tempEnc[pos - blockSize + j] = (byte) (intermediate[pos + j] ^ iteration + 1);
+                    tempEnc[pos - blockSize + j] = (byte) (intermediate[pos + j] ^ iteration);
                 }
 
                 // get original plaintext byte

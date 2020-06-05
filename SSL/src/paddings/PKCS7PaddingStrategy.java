@@ -19,7 +19,7 @@ public class PKCS7PaddingStrategy implements PaddingStrategy {
 		// make array of padding and fill it up with the byte of the paddingsize
 		byte[] padding = new byte[paddingSize];
 		for (int i = 0; i < paddingSize; i++) {
-			padding[i] = (byte) paddingSize;
+			padding[i] = (byte) (paddingSize - 1);
 		}
 
 		// make new array for padded message
@@ -43,11 +43,10 @@ public class PKCS7PaddingStrategy implements PaddingStrategy {
 	@Override
 	public boolean checkPadding(byte[] padding) {
 		boolean res = false;
-
 		// checks if last byte in padding equals valid padding byte
 		for (int k = 0; k < 16; k++) {
 			// if the last byte is a valid byte, count if the number of valid bytes is correct
-			if (padding[15] == (byte) (k + 1)) {
+			if (padding[15] == (byte) (k)) {
 				res = counter(padding,k + 1);
 				// if the number is valid break and return
 				if (res) {
@@ -71,7 +70,7 @@ public class PKCS7PaddingStrategy implements PaddingStrategy {
 
 		// check if the remaining bytes up to length is correct
 		for (int i = 14; i > 15 - length; i--) {
-			res = padding[i] == (byte) length;
+			res = padding[i] == (byte) (length - 1);
 			// if false break and return
 			if (!res) break;
 		}
